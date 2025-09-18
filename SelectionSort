@@ -1,0 +1,57 @@
+package Ordenacao;
+
+import java.util.Random;
+
+public class SelectionSort {
+
+	public static void imprimirVetor(int vetor[]) {
+		for(int i=0; i<vetor.length; i++) {
+			System.out.println(vetor[i]);
+		}
+	}
+	
+	public static void ordenar(int vetor[]) {
+		long cont=0;
+		long ntrocas=0;
+		for(int i=0;i<vetor.length-1;i++) {
+			int menor=vetor[i];
+			int indice_menor=i;
+			for(int j=i+1;j<vetor.length;j++) {
+				cont++;
+				if(vetor[j]<menor) {
+					menor=vetor[j];
+					indice_menor=j;
+				}
+			}
+			if(indice_menor!=i) {
+				vetor[indice_menor] = vetor[i];
+				vetor[i]=menor;
+				ntrocas++;
+			}
+		}
+		System.out.println("Numero de comparacoes:"+cont);
+		System.out.println("Numero de trocas "+ntrocas);
+	}
+	
+	public static void main(String[] args) {
+		
+		int vetor[]= {7,4,5,9,8,2,1};
+		imprimirVetor(vetor);
+		ordenar(vetor);
+		System.out.println("Ordenado");
+		imprimirVetor(vetor);
+		
+		vetor=new int[1000000];
+		Random r=new Random();
+		for(int i=0;i<vetor.length;i++) {
+			vetor[i]=r.nextInt();
+		}
+		System.out.println("Começou a ordenar");
+		long tempo=System.currentTimeMillis();
+		ordenar(vetor);
+		tempo=System.currentTimeMillis()-tempo;
+		System.out.println("Terminou em "+tempo);
+				
+	}
+	
+}
