@@ -1,0 +1,75 @@
+package Ordenacao;
+
+import java.util.Random;
+
+public class MergeSort {
+	
+	//inicio da divisão
+	
+	public static void ordenar(int vetor[]) {
+		
+		if(vetor.length<=1);
+		
+		int tam1 = vetor.length/2;
+		int tam2 = vetor.length-tam1;
+		int vet1[] = new int[tam1];
+		int vet2[] = new int[tam2];
+		for(int i=0; i<tam1; i++) {
+			vet1[i] = vetor[i];
+		}
+		for(int i=0; i<tam2; i++) {
+			vet2[i] = vetor[i+tam1];
+		}
+		
+		//fim da divisão
+		//ordenando vetores
+		
+		ordenar (vet1);
+		ordenar (vet2);
+		
+		//juntar os vetores
+		
+		int ind_v1=0, ind_v2=0, ind_v3=0;
+		while(ind_v1<vet1.length && ind_v2<vet2.length) {
+			if(vet1[ind_v1]<vet2[ind_v2]) {
+				vetor[ind_v3]=vet1[ind_v1];
+				ind_v1++;
+				ind_v3++;
+			}else {
+				vetor[ind_v3] = vet2[ind_v2];
+				ind_v2++;
+				ind_v3++;
+			}
+		}
+		while(ind_v1<vet1.length) {
+			vetor[ind_v3]=vet1[ind_v1];
+			ind_v1++;
+			ind_v3++;
+		}
+		while(ind_v2<vet2.length) {
+			vetor[ind_v3]=vet2[ind_v2];
+			ind_v2++;
+			ind_v3++;
+		}
+	}
+	
+	public static void main (String args[]) {
+		//int vetor[] = {9,4,7,3,10,6};
+		
+		int vetor[] = new int[400000];
+		
+				
+		Random r=new Random();
+		
+		for(int i=0; i<vetor.length;i++) {
+			vetor[i] = r.nextInt();
+		}
+				
+		//SelectionSort.imprimirVetor(vetor);
+		System.out.println("Começou a ordenar");
+		long tempo = System.currentTimeMillis();
+		ordenar(vetor);
+		tempo = System.currentTimeMillis()-tempo;
+		System.out.println("Ordenado em" + tempo);
+	}
+}
