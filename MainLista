@@ -1,0 +1,40 @@
+package listas;
+
+public class Main {
+	
+	public static void main(String args[]) {
+		ListaSimples l=new ListaSimples();
+		l.inserirFim(1);
+		l.inserirIni(2);
+		l.inserirIni(3);
+		l.inserirFim(4);
+		
+		
+		l.inserirApos(8, 2);
+		
+		l.imprimir();
+		l.remover(1);
+		l.remover(3);
+		l.remover(4);
+		l.imprimir();
+		
+		/*for(int i =0; i<100000; i++) {
+		l.inserirFim(5);
+	}*/
+		
+		System.out.println("Acabou");
+		
+		ListaDupla Id = new ListaDupla();
+		Id.inserirFim("Casa");
+		Id.inserirFim("Lote");
+		Id.inserirFim("Apartamento");
+		Id.imprimirRev();
+		
+		for(int i=0; i<100000; i++) {
+			Id.inserirFim("Teste");
+		}
+		System.out.println("Acabou");
+		
+	}
+
+}
