@@ -1,0 +1,49 @@
+package Ordenacao;
+
+import java.util.Random;
+
+public class Bubblesort {
+	
+	public static void ordenar(int vetor[]) {
+		boolean trocou=true;
+		int n_loops=0;
+		long cont=0,ntrocas=0;
+		while(trocou) {
+			trocou=false;
+			n_loops++;
+			for(int i=0;i<vetor.length-n_loops;i++) {
+				//ordem errada posicao i maior q o proximo
+				cont++;
+				if(vetor[i]>vetor[i+1]) {
+					int temp=vetor[i+1];
+					vetor[i+1]=vetor[i];
+					vetor[i]=temp;
+					ntrocas++;
+					trocou=true;
+				}
+			}
+			
+		}
+		System.out.println("Numero de comparações "+cont);
+		System.out.println("Numero de trocas "+ntrocas);
+	}
+	public static void main(String args[]) {
+		int vetor[]= {-2,45,0,11,-9};
+		SelectionSort.imprimirVetor(vetor);
+		ordenar(vetor);
+		System.out.println("Ordenado");
+		SelectionSort.imprimirVetor(vetor);
+		
+		vetor=new int[1000000];
+		Random r=new Random(82000);
+		for(int i=0;i<vetor.length;i++) {
+			vetor[i]=r.nextInt();
+		}
+		System.out.println("Começando");
+		long tempo=System.currentTimeMillis();
+		ordenar(vetor);
+		tempo=System.currentTimeMillis()-tempo;
+		System.out.println("terminou em "+tempo);
+	}
+
+}
