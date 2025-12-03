@@ -1,0 +1,316 @@
+import java.util.ArrayList;
+import java.util.List;
+
+public class SolucaoArvores {
+
+    public static void main(String[] args) {
+        // --- Definição das Sequências ---
+        int[] seqA = {30, 10, 20, 40, 50, 25};
+        int[] seqB = {7, 3, 18, 10, 22, 8, 11, 26};
+
+        // --- Processamento da Sequência A ---
+        System.out.println("=========================================");
+        System.out.println("       SEQUÊNCIA A: 30, 10, 20, 40, 50, 25");
+        System.out.println("=========================================\n");
+        executarTestes("A", seqA);
+
+        // --- Processamento da Sequência B ---
+        System.out.println("\n\n=========================================");
+        System.out.println("       SEQUÊNCIA B: 7, 3, 18, 10, 22, 8, 11, 26");
+        System.out.println("=========================================\n");
+        executarTestes("B", seqB);
+    }
+
+    private static void ejecutarTestes(String nomeSeq, int[] dados) {
+        // 1. BST
+        BST bst = new BST();
+        for (int v : dados) bst.insert(v);
+        System.out.println("--- " + nomeSeq + ": Árvore Binária de Busca (BST) ---");
+        TreePrinter.print(bst.root);
+
+        // 2. AVL
+        AVL avl = new AVL();
+        for (int v : dados) avl.insert(v);
+        System.out.println("\n--- " + nomeSeq + ": Árvore AVL ---");
+        TreePrinter.print(avl.root);
+
+        // 3. Rubro-Negra
+        RBTree rb = new RBTree();
+        for (int v : dados) rb.insert(v);
+        System.out.println("\n--- " + nomeSeq + ": Árvore Rubro-Negra (R=Red, B=Black) ---");
+        TreePrinter.print(rb.root);
+    }
+
+    // ==========================================
+    // ESTRUTURA 1: BST Simples
+    // ==========================================
+    static class Node {
+        int key;
+        Node left, right;
+        int height; // Usado na AVL
+        boolean color; // Usado na RB (true = RED, false = BLACK)
+        Node parent; // Usado na RB
+
+        public Node(int item) {
+            key = item;
+            left = right = parent = null;
+            height = 1;
+            color = true; // Novos nós RB nascem vermelhos
+        }
+
+        @Override
+        public String toString() {
+            // Se for RB, mostra a cor. Se não, só o valor.
+            // O TreePrinter vai usar isso.
+            return String.valueOf(key);
+        }
+    }
+
+    static class BST {
+        Node root;
+
+        void insert(int key) {
+            root = insertRec(root, key);
+        }
+
+        Node insertRec(Node root, int key) {
+            if (root == null) {
+                return new Node(key);
+            }
+            if (key < root.key)
+                root.left = insertRec(root.left, key);
+            else if (key > root.key)
+                root.right = insertRec(root.right, key);
+            return root;
+        }
+    }
+
+    // ==========================================
+    // ESTRUTURA 2: Árvore AVL
+    // ==========================================
+    static class AVL {
+        Node root;
+
+        int height(Node N) {
+            if (N == null) return 0;
+            return N.height;
+        }
+
+        int getBalance(Node N) {
+            if (N == null) return 0;
+            return height(N.left) - height(N.right);
+        }
+
+        Node rightRotate(Node y) {
+            Node x = y.left;
+            Node T2 = x.right;
+            x.right = y;
+            y.left = T2;
+            y.height = Math.max(height(y.left), height(y.right)) + 1;
+            x.height = Math.max(height(x.left), height(x.right)) + 1;
+            return x;
+        }
+
+        Node leftRotate(Node x) {
+            Node y = x.right;
+            Node T2 = y.left;
+            y.left = x;
+            x.right = T2;
+            x.height = Math.max(height(x.left), height(x.right)) + 1;
+            y.height = Math.max(height(y.left), height(y.right)) + 1;
+            return y;
+        }
+
+        void insert(int key) {
+            root = insertRec(root, key);
+        }
+
+        Node insertRec(Node node, int key) {
+            if (node == null) return new Node(key);
+
+            if (key < node.key)
+                node.left = insertRec(node.left, key);
+            else if (key > node.key)
+                node.right = insertRec(node.right, key);
+            else
+                return node; // Duplicatas não permitidas
+
+            node.height = 1 + Math.max(height(node.left), height(node.right));
+            int balance = getBalance(node);
+
+            // Casos de Rotação
+            // Esquerda-Esquerda (LL)
+            if (balance > 1 && key < node.left.key)
+                return rightRotate(node);
+
+            // Direita-Direita (RR)
+            if (balance < -1 && key > node.right.key)
+                return leftRotate(node);
+
+            // Esquerda-Direita (LR)
+            if (balance > 1 && key > node.left.key) {
+                node.left = leftRotate(node.left);
+                return rightRotate(node);
+            }
+
+            // Direita-Esquerda (RL)
+            if (balance < -1 && key < node.right.key) {
+                node.right = rightRotate(node.right);
+                return leftRotate(node);
+            }
+
+            return node;
+        }
+    }
+
+    // ==========================================
+    // ESTRUTURA 3: Árvore Rubro-Negra (Red-Black)
+    // ==========================================
+    static class RBTree {
+        private final boolean RED = true;
+        private final boolean BLACK = false;
+        Node root;
+
+        // Rotação à esquerda para RB (ajusta pais)
+        void leftRotate(Node x) {
+            Node y = x.right;
+            x.right = y.left;
+            if (y.left != null) y.left.parent = x;
+            y.parent = x.parent;
+            if (x.parent == null) root = y;
+            else if (x == x.parent.left) x.parent.left = y;
+            else x.parent.right = y;
+            y.left = x;
+            x.parent = y;
+        }
+
+        // Rotação à direita para RB (ajusta pais)
+        void rightRotate(Node y) {
+            Node x = y.left;
+            y.left = x.right;
+            if (x.right != null) x.right.parent = y;
+            x.parent = y.parent;
+            if (y.parent == null) root = x;
+            else if (y == y.parent.left) y.parent.left = x;
+            else y.parent.right = x;
+            x.right = y;
+            y.parent = x;
+        }
+
+        void insert(int key) {
+            Node node = new Node(key);
+            root = bstInsert(root, node);
+            fixViolation(node);
+        }
+
+        // Inserção padrão BST retornando a raiz atualizada, mas mantendo ponteiros 'parent'
+        Node bstInsert(Node root, Node node) {
+            if (root == null) return node;
+            if (node.key < root.key) {
+                root.left = bstInsert(root.left, node);
+                root.left.parent = root;
+            } else if (node.key > root.key) {
+                root.right = bstInsert(root.right, node);
+                root.right.parent = root;
+            }
+            return root;
+        }
+
+        void fixViolation(Node node) {
+            Node parent = null;
+            Node grandParent = null;
+
+            while (node != root && node.color == RED && node.parent.color == RED) {
+                parent = node.parent;
+                grandParent = node.parent.parent;
+
+                // Caso A: Pai é filho esquerdo do avô
+                if (parent == grandParent.left) {
+                    Node uncle = grandParent.right;
+                    // Caso 1: Tio é vermelho (Recolorir)
+                    if (uncle != null && uncle.color == RED) {
+                        grandParent.color = RED;
+                        parent.color = BLACK;
+                        uncle.color = BLACK;
+                        node = grandParent;
+                    } else {
+                        // Caso 2: Tio é preto e nó é filho direito (Rotação Dupla/Esq)
+                        if (node == parent.right) {
+                            leftRotate(parent);
+                            node = parent;
+                            parent = node.parent;
+                        }
+                        // Caso 3: Tio é preto e nó é filho esquerdo (Rotação Simples/Dir)
+                        rightRotate(grandParent);
+                        boolean tempColor = parent.color;
+                        parent.color = grandParent.color;
+                        grandParent.color = tempColor;
+                        node = parent;
+                    }
+                } 
+                // Caso B: Pai é filho direito do avô (Espelho do Caso A)
+                else {
+                    Node uncle = grandParent.left;
+                    if (uncle != null && uncle.color == RED) {
+                        grandParent.color = RED;
+                        parent.color = BLACK;
+                        uncle.color = BLACK;
+                        node = grandParent;
+                    } else {
+                        if (node == parent.left) {
+                            rightRotate(parent);
+                            node = parent;
+                            parent = node.parent;
+                        }
+                        leftRotate(grandParent);
+                        boolean tempColor = parent.color;
+                        parent.color = grandParent.color;
+                        grandParent.color = tempColor;
+                        node = parent;
+                    }
+                }
+            }
+            if (root != null) root.color = BLACK;
+        }
+    }
+
+    // ==========================================
+    // UTILITÁRIO DE IMPRESSÃO
+    // ==========================================
+    static class TreePrinter {
+        public static void print(Node root) {
+            printRec(root, "", true);
+        }
+
+        private static void printRec(Node node, String prefix, boolean isTail) {
+            if (node != null) {
+                System.out.print(prefix + (isTail ? "└── " : "├── "));
+                
+                // Formatação especial para Rubro-Negra
+                String suffix = "";
+                // Como não temos uma flag "isRBTree", checamos se a classe RB foi usada
+                // Mas para simplificar, se for árvore normal a cor padrão é true.
+                // Vamos imprimir a cor se quiser diferenciar:
+                String colorLabel = (node.color == true) ? "[R]" : "[B]";
+                
+                System.out.println(node.key + " " + colorLabel);
+                
+                List<Node> children = new ArrayList<>();
+                if (node.left != null || node.right != null) {
+                    children.add(node.left);
+                    children.add(node.right);
+                }
+                
+                for (int i = 0; i < children.size() - 1; i++) {
+                    printRec(children.get(i), prefix + (isTail ? "    " : "│   "), false);
+                }
+                if (children.size() > 0) {
+                    printRec(children.get(children.size() - 1), prefix + (isTail ? "    " : "│   "), true);
+                }
+            } else {
+                 // Descomente abaixo se quiser ver os nós NULL
+                 // System.out.println(prefix + (isTail ? "└── " : "├── ") + "null");
+            }
+        }
+    }
+}
